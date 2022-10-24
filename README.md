@@ -3,5 +3,5 @@
 Team Members: 
 
 David Jung
-Khloe Coward
+Chloe Coward
 David Joy
