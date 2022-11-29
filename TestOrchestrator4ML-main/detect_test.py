@@ -15,7 +15,7 @@ def giveTimeStamp():
     
 def checkTestFile(path2dir): 
     """
-    Check sif project includes tests.
+    Check sif project includes tests. Making Change
     We look for files that start with test (or tests, Test, Tests) or end with test.py (tests.py,
     Test.py, Tests.py).
     """
