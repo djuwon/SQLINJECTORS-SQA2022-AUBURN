@@ -39,15 +39,19 @@ def identifyAlgo(inp_dir, algo_output_csv):
                             algo_list_per_project = list(set(algo_list_per_project)) 
             if (len(algo_list_per_project) > 0):
                 print(algo_list_per_project)
+                logging.debug(f'Directory {inp_dir} at index {index} algorithms: {algo_list_per_project}')
                 the_tup = (project_name, algo_list_per_project)
                 algo_list.append(the_tup)
-     
+    
+    logging.debug(f'Directory {inp_dir} algorithms: {algo_list}')
+
     if (len(algo_list) > 0):
         algo_list_df = pd.DataFrame( algo_list ) 
         algo_list_df.to_csv(algo_output_csv, header= ["PROJECT","ALGO_NAME"],index=False, encoding= constants.UTF_ENCODING)  
 
 
 if __name__=='__main__': 
+	logging.basicConfig(filename="../../logs/indentify_algo.log", filemode="a+", format='%(asctime)s:%(levelname)s:%(message)s')
 
 	t1 = time.time()
 	print('Started at:', giveTimeStamp() )
