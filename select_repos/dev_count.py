@@ -9,6 +9,8 @@ import shutil
 from git import Repo
 from git import exc 
 
+import logging
+
 
 def giveTimeStamp():
   tsObj = time.time()
@@ -51,11 +53,16 @@ def getDevCount(full_path_to_repo, branchName='master', explore=1000):
                     emails = getDevEmailForCommit(full_path_to_repo, commit_hash)
                     repo_emails = repo_emails + emails
                 
+                logging.debug(f'Repo {full_path_to_repo} branch {branchName} developers:\n{" ".join(repo_emails)}')
+
             except exc.GitCommandError:
                 print('Skipping this repo ... due to branch name problem', full_path_to_repo )
+                logging.error(f'Branch name problem: {full_path_to_repo}')
         except exc.InvalidGitRepositoryError:
             print('Skipping this repo ... due to not finding the git repo', full_path_to_repo )
+            logging.error(f'Git repo not found: {full_path_to_repo}')
     else:
+        logging.warn(f'Path {full_path_to_repo} does not exist; using default 10 emails')
         repo_emails = [ str(x_) for x_ in range(10) ]
     
     return len(repo_emails)
@@ -67,16 +74,20 @@ def getTopRepos(repo_list):
     for repo_ in repo_list:
         print(repo_)
         dev_count = getDevCount(repo_)
+
+        logging.debug(f'Repo {repo_}: Found {dev_count} devs')
+        
         repo_dev_dict[repo_] = dev_count
         print('#'*100 )
     repo_dev_dict = sorted(repo_dev_dict.items(), key=lambda x: x[1], reverse=True)
 
     df_ = pd.DataFrame( repo_dev_dict ) 
-    df_.to_csv('../Output/dev_count.csv', header=['REPO', 'DEVS'] , index=False, encoding='utf-8')    
+    df_.to_csv('../Output/dev_count.csv', header=['REPO', 'DEVS'] , index=False, encoding='utf-8')
 
-    
+    logging.debug(f'Dataframe Size: {df_.shape}')
 
 if __name__=='__main__':
+    logging.basicConfig(filename="../logs/dev_count.log", filemode="a+", format='%(asctime)s:%(levelname)s:%(message)s')
 
     t1 = time.time()
     print('Started at:', giveTimeStamp() )

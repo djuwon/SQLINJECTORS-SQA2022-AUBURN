@@ -7,6 +7,7 @@ import py_parser
 import numpy as np 
 import label_perturbation_main
 
+import logging
 
 def giveTimeStamp():
   tsObj = time.time()
@@ -16,6 +17,8 @@ def giveTimeStamp():
 
 def generateUnitTest(algo, attack_type):
     file_name = "../../output/attack_unit_test/test_attack_" + algo + ".py"
+    logging.debug(f'Creating a {attack_type} attack\nWriting to {file_name}')
+    #^ will be logged right after the two statements in generateAttack, so we will know which input this goes with
     with open(file_name,"w+") as file:
         file.write("import unittest\n")
         file.write("import label_perturbation_main\n")
@@ -38,11 +41,15 @@ def generateAttack(inp_dir, delta):
     if os.path.exists(inp_dir):
         algo_df = pd.read_csv(inp_dir)
     else:
+        logging.error(f'Could not load csv: {inp_dir}')
         return
     for index, row in algo_df.iterrows():
         row['ALGO_NAME'] = row['ALGO_NAME'].replace('[', '')
         row['ALGO_NAME'] = row['ALGO_NAME'].replace(']', '')
         algo_list = row['ALGO_NAME'].split(',')
+
+        logging.debug(f'Algorithms in {inp_dir}:\n{algo_list}')
+
         for algo in algo_list:
             algo = algo.replace('\'', '')
             algo = algo.replace(' ', '')
@@ -50,6 +57,10 @@ def generateAttack(inp_dir, delta):
             random_diff = random_auc[0] -  initial_auc[0]
             loss_diff = loss_auc[0] -  initial_auc[0]
             prob_diff = prob_auc[0] -  initial_auc[0]
+            
+            #we don't rewrite inp_dir, since it was logged in the previous debug statement
+            logging.debug(f'Random: {random_diff}.  Loss: {loss_diff}.  Prob: {prob_diff}.')
+
             if (random_diff < delta): 
                 generateUnitTest(algo, 'random')
             elif (loss_diff < delta): 
@@ -59,6 +70,7 @@ def generateAttack(inp_dir, delta):
                 
 
 if __name__=='__main__': 
+    logging.basicConfig(filename="../logs/generation.log", filemode="a+", format='%(asctime)s:%(levelname)s:%(message)s')
 
     delta = 0.5
     
